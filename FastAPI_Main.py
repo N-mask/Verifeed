@@ -5,9 +5,13 @@ import csv
 
 app = FastAPI()
 
-app.mount('../frontend/',StaticFiles(directory='/frontend'),name="static")
+app.mount('/root/',StaticFiles(directory='frontend'),name="static")
 
 
-@app.get('/',response_class=FileResponse)
+@app.get('/')
 def homepage():
+    return FileResponse('frontend/index.html')
+
+@app.get('/login/')
+def login():
     return FileResponse('frontend/login.html')
