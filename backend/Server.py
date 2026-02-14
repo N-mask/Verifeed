@@ -24,12 +24,11 @@ async def loginM(email:str,password:str):
     logged = await login(email,password)
     print(logged)
     if logged:
-        uid = "demouid"
         return {
-            "token":uid,
+            "token":"demouid",
             "user":{
                 "email":email,
-                "username":await getUserName(email)
+                "username":getUserName(email)
             }
         }
     else:
@@ -41,7 +40,7 @@ async def registerM(username:str,email:str,password:str):
     if reg:
         return { "message": "User registered successfully" }
     else:
-        return None
+        return HTTPException(400,'User already exists !')
 
 @app.get('/posts')
 async def getPostsM():

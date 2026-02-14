@@ -8,16 +8,19 @@ usernameGlobal = ''
 
 async def register(username:str,password:str,mail:str,adminStatus:int):
     cursor = connection.cursor()
-    cursor.execute('INSERT into users (username,email,password,admin) VALUES (?,?,?,?)',(username,mail,password,adminStatus))
+    cursor.execute('SELECT * FROM users where username=?',(username,))
+    if not cursor.fetchone():
+        cursor.execute('INSERT into users (username,email,password,admin) VALUES (?,?,?,?)',(username,mail,password,adminStatus))
+    else:
+        return False
     connection.commit()
-    print(f'new user registered{mail} , {password}')
     return login(mail,password)
 
 async def getUserName(email:str):
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM users  WHERE email=?',(email,))
     connection.commit()
-    return cursor.fetchone()
+    return str(cursor.fetchone())
 
 async def login(mail:str,password:str):
     cursor = connection.cursor()
