@@ -21,7 +21,7 @@ async def getUserName(email:str):
     cursor.execute('SELECT * FROM users  WHERE email=?',(email,))
     data = cursor.fetchone()
     if data:
-        return data['username']
+        return data[0]
     else:
         return "X"
 

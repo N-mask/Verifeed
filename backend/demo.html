@@ -88,61 +88,56 @@
     </div>
 
     <div id="view-dashboard" class="hidden flex-col w-full min-h-screen">
+    <nav class="bg-white border-b-4 border-[#1A1A1A] sticky top-0 z-50 px-4 h-16 flex items-center justify-between">
+        <h1 class="text-2xl font-black italic tracking-tighter">Verifeed</h1>
         
-        <nav class="bg-white border-b-4 border-[#1A1A1A] sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-                <div class="flex items-center gap-8">
-                    <h1 class="text-3xl font-black italic tracking-tighter cursor-pointer">Verifeed</h1>
-                    <div class="hidden md:flex gap-1 bg-[#1A1A1A] p-0.5">
-                        <a href="#" class="bg-white text-black text-xs font-black uppercase tracking-widest px-4 py-1 hover:bg-gray-200">Global</a>
-                        <a href="#" class="bg-white text-black text-xs font-black uppercase tracking-widest px-4 py-1 hover:bg-gray-200">Tech</a>
-                        <a href="#" class="bg-white text-black text-xs font-black uppercase tracking-widest px-4 py-1 hover:bg-gray-200">Politics</a>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-6">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-[10px] font-black uppercase tracking-widest leading-none text-gray-400">Authenticated as</p>
-                        <p id="user-display" class="text-sm font-bold text-blue-700">User</p>
-                    </div>
-                    
-                    <button onclick="toggleModal('post')" class="bg-[#1A1A1A] text-white text-xs py-2 px-6 font-black uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
-                        Publish
-                    </button>
-                    
-                    <button onclick="handleLogout()" class="text-gray-400 hover:text-red-600 transition-colors" title="Logout">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <div class="bg-blue-700 text-white overflow-hidden py-2 border-b-2 border-[#1A1A1A]">
-            <div class="whitespace-nowrap animate-ticker inline-block text-xs font-black uppercase tracking-[0.2em]">
-                 +++ VERIFEED NETWORK ACTIVE +++ BREAKING: MARKET STABILIZES AFTER TECH SUMMIT +++ NEW PROTOCOLS IN EFFECT +++ REPORT: CLIMATE ACTION PLAN APPROVED +++
+        <div class="flex items-center gap-6">
+            <button onclick="toggleModal()" class="bg-[#1A1A1A] text-white px-4 py-2 text-xs font-black uppercase hover:bg-blue-700 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)]">
+                + Publish
+            </button>
+            
+            <div class="flex items-center gap-4 border-l-2 border-gray-200 pl-6">
+                <span id="user-display" class="text-xs font-bold text-blue-700 uppercase">User</span>
+                <button onclick="logout()" class="text-xs font-black uppercase underline hover:text-red-600">Logout</button>
             </div>
         </div>
+    </nav>
 
-        <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
-            <div class="text-center mb-16">
-                <h2 class="text-7xl font-black mb-4 serif tracking-tighter">The Daily Feed</h2>
-                <div class="h-1 w-24 bg-[#1A1A1A] mx-auto mb-4"></div>
-                <p class="text-gray-500 font-serif italic text-lg">"Trust, but verify."</p>
-            </div>
-
-            <div id="posts-container" class="grid grid-cols-1 gap-12">
-                <div class="flex justify-center p-10">
-                    <div class="loader"></div>
-                </div>
-            </div>
-        </main>
-        
-        <footer class="bg-white border-t-2 border-[#1A1A1A] py-8 text-center">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">© 2026 Verifeed Inc. // Secure Connection</p>
-        </footer>
+    <div class="bg-blue-700 text-white py-2 overflow-hidden">
+        <div class="whitespace-nowrap text-xs font-black uppercase tracking-widest text-center">
+            +++ LIVE FEED CONNECTION ESTABLISHED +++
+        </div>
     </div>
+
+    <main class="max-w-4xl mx-auto w-full px-4 py-8">
+        <div id="posts-container" class="grid gap-8">
+            <div class="text-center py-10"><div class="loader mx-auto"></div></div>
+        </div>
+    </main>
+
+    <div id="post-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg p-6 border-4 border-blue-700 shadow-2xl relative">
+            <button onclick="toggleModal()" class="absolute top-2 right-4 text-3xl hover:text-red-600 font-bold">&times;</button>
+            
+            <h3 class="text-2xl font-black serif mb-6 italic">Broadcast News</h3>
+            
+            <form onsubmit="event.preventDefault(); createPost();" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Headline</label>
+                    <input type="text" id="post-title" class="w-full border-2 border-gray-200 p-3 font-serif font-bold focus:border-[#1A1A1A] outline-none" placeholder="Enter headline..." required>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Content</label>
+                    <textarea id="post-content" class="w-full border-2 border-gray-200 p-3 font-serif h-32 resize-none focus:border-[#1A1A1A] outline-none" placeholder="Story content..." required></textarea>
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button type="button" onclick="toggleModal()" class="mr-4 text-xs font-black uppercase hover:text-red-600">Cancel</button>
+                    <button type="submit" class="bg-[#1A1A1A] text-white px-8 py-3 text-xs font-black uppercase hover:bg-blue-700 transition-colors">Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
     <div id="modal-post" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-2xl p-8 border-4 border-blue-700 shadow-2xl relative">
@@ -278,13 +273,18 @@
         }
     }
 
-    function logout() {
-        localStorage.removeItem('verifeed_token');
-        localStorage.removeItem('verifeed_user');
-        state.token = null;
-        state.user = null;
-        showAuth();
+    function toggleModal() {
+        const modal = document.getElementById('post-modal');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex'); // 'flex' centers it via CSS
+        } else {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
+
+    // --- API ACTIONS ---
 
     async function createPost() {
         const title = document.getElementById('post-title').value;
@@ -293,29 +293,44 @@
         if (!state.token) return logout();
 
         try {
-            const response = await fetch(`${fastAPI}/posts`, {
+            const response = await fetch(`${API_URL}/posts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${state.token}` 
+                    'Authorization': `Bearer ${state.token}`
                 },
                 body: JSON.stringify({ 
                     title: title, 
                     content: content,
-                    user: state.user.username
+                    user: state.user.username 
                 })
             });
 
             if (response.ok) {
+                // Clear inputs
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-content').value = '';
+                
+                // Close modal
+                toggleModal(); 
+                
+                // Refresh feed
                 loadPosts(); 
             } else {
                 alert("Failed to post");
             }
         } catch (err) {
+            console.error(err);
             alert("Error posting content");
         }
+    }
+
+    function logout() {
+        localStorage.removeItem('verifeed_token');
+        localStorage.removeItem('verifeed_user');
+        state.token = null;
+        state.user = null;
+        showAuth();
     }
 
     async function loadPosts() {
