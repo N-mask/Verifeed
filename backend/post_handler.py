@@ -17,6 +17,13 @@ async def getPosts():
     cursor = connection.cursor()
     cursor.execute("select * FROM content")
     posts = cursor.fetchall()
+    for post in posts:
+        results.append({
+            "title": post[0],  
+            "rating": post[1], 
+            "user": post[2],   
+            "content": post[3]
+        })
     return posts
 
 async def delAll(adminStaus:int):
