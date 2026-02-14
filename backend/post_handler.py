@@ -17,7 +17,7 @@ async def getPosts():
     cursor = connection.cursor()
     cursor.execute("select * FROM content")
     posts = cursor.fetchall()
-    return [dict(post) for post in posts]
+    return posts
 
 async def delAll(adminStaus:int):
     if adminStaus == 1:
