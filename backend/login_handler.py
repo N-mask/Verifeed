@@ -10,6 +10,7 @@ async def register(username:str,password:str,mail:str,adminStatus:int):
     cursor = connection.cursor()
     cursor.execute('INSERT into users (username,email,password,admin) VALUES (?,?,?,?)',(username,mail,password,adminStatus))
     connection.commit()
+    print(f'new user registered{mail} , {password}')
     return login(mail,password)
 
 async def login(mail:str,password:str):

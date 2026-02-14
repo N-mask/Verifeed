@@ -50,7 +50,8 @@ async def getPostsM():
 
 @app.get('/getusers')
 async def getUsersM():
-    return getUsers()
+    users = await getUsers()
+    return users
 
 @app.get('/insertUser')
 async def addDummy():
