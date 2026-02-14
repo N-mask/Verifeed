@@ -170,262 +170,185 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
-        const API_URL = 'http://localhost:8000'; // Change this to your actual backend URL
+    const fastAPI = 'http://127.0.0.1:8000';
+    let state = {
+        token: localStorage.getItem('verifeed_token') || null,
+        user: JSON.parse(localStorage.getItem('verifeed_user')) || null
+    };
+    window.addEventListener('DOMContentLoaded', () => {
+        if (state.token) {
+            showDashboard();
+        } else {
+            showAuth();
+        }
+    });
+
+    function showAuth() {
+        document.getElementById('view-auth').classList.remove('hidden');
+        document.getElementById('view-auth').classList.add('flex');
+        document.getElementById('view-dashboard').classList.add('hidden');
+        document.getElementById('view-dashboard').classList.remove('flex');
+    }
+
+    function showDashboard() {
+        document.getElementById('view-auth').classList.add('hidden');
+        document.getElementById('view-auth').classList.remove('flex');
+        document.getElementById('view-dashboard').classList.remove('hidden');
+        document.getElementById('view-dashboard').classList.add('flex');
         
-        // --- STATE MANAGEMENT ---
-        const state = {
-            token: localStorage.getItem('verifeed_token') || null,
-            user: JSON.parse(localStorage.getItem('verifeed_user')) || null
-        };
+        if(state.user) {
+            document.getElementById('user-display').textContent = state.user.username || state.user.email;
+        }
+        loadPosts();
+    }
 
-        // --- INIT ---
-        window.addEventListener('DOMContentLoaded', () => {
-            if (state.token) {
-                switchView('dashboard');
-                loadPosts();
-                document.getElementById('user-display').textContent = state.user?.username || 'User';
+    function toggleAuth(view) {
+        const loginForm = document.getElementById('form-login');
+        const regForm = document.getElementById('form-register');
+        const tabLogin = document.getElementById('tab-login');
+        const tabReg = document.getElementById('tab-register');
+
+        if (view === 'login') {
+            loginForm.classList.remove('hidden');
+            regForm.classList.add('hidden');
+            tabLogin.classList.add('bg-[#1A1A1A]', 'text-white');
+            tabLogin.classList.remove('bg-gray-50', 'text-gray-400');
+            tabReg.classList.remove('bg-[#1A1A1A]', 'text-white');
+            tabReg.classList.add('bg-gray-50', 'text-gray-400');
+        } else {
+            loginForm.classList.add('hidden');
+            regForm.classList.remove('hidden');
+            tabReg.classList.add('bg-[#1A1A1A]', 'text-white');
+            tabReg.classList.remove('bg-gray-50', 'text-gray-400');
+            tabLogin.classList.remove('bg-[#1A1A1A]', 'text-white');
+            tabLogin.classList.add('bg-gray-50', 'text-gray-400');
+        }
+    }
+    async function handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorMsg = document.getElementById('auth-message');
+
+        try {
+            const response = await fetch(`${fastAPI}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                state.token = data.token;
+                state.user = data.user;
+                localStorage.setItem('verifeed_token', data.token);
+                localStorage.setItem('verifeed_user', JSON.stringify(data.user));
+                showDashboard();
             } else {
-                switchView('auth');
+                errorMsg.textContent = data.detail || "Login failed";
             }
-        });
+        } catch (err) {
+            console.error(err);
+            errorMsg.textContent = "Server connection failed";
+        }
+    }
 
-        // --- UI FUNCTIONS ---
-        function switchView(viewName) {
-            const authView = document.getElementById('view-auth');
-            const dashView = document.getElementById('view-dashboard');
-            
-            if (viewName === 'auth') {
-                authView.classList.remove('hidden');
-                authView.classList.add('flex');
-                dashView.classList.add('hidden');
-                dashView.classList.remove('flex');
+    async function handleRegister() {
+        const username = document.getElementById('reg-username').value;
+        const email = document.getElementById('reg-email').value;
+        const password = document.getElementById('reg-password').value;
+        const errorMsg = document.getElementById('auth-message');
+
+        try {
+            const response = await fetch(`${fastAPI}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password })
+            });
+
+            if (response.ok) {
+                alert("Registration successful! Please log in.");
+                toggleAuth('login');
             } else {
-                authView.classList.add('hidden');
-                authView.classList.remove('flex');
-                dashView.classList.remove('hidden');
-                dashView.classList.add('flex');
-            }
-        }
-
-        function slideAuth(target) {
-            const slider = document.getElementById('auth-slider');
-            const tabLogin = document.getElementById('tab-login');
-            const tabReg = document.getElementById('tab-register');
-            const errorBox = document.getElementById('auth-error');
-
-            errorBox.classList.add('hidden'); // clear errors on switch
-
-            if (target === 'login') {
-                slider.style.transform = "translateX(0%)";
-                tabLogin.classList.add('bg-white', 'shadow-sm', 'text-black');
-                tabLogin.classList.remove('text-gray-400');
-                tabReg.classList.remove('bg-white', 'shadow-sm', 'text-black');
-                tabReg.classList.add('text-gray-400');
-            } else {
-                slider.style.transform = "translateX(-50%)";
-                tabReg.classList.add('bg-white', 'shadow-sm', 'text-black');
-                tabReg.classList.remove('text-gray-400');
-                tabLogin.classList.remove('bg-white', 'shadow-sm', 'text-black');
-                tabLogin.classList.add('text-gray-400');
-            }
-        }
-
-        function toggleModal(modalName) {
-            const modal = document.getElementById(`modal-${modalName}`);
-            modal.classList.toggle('hidden');
-        }
-
-        function showError(msg) {
-            const el = document.getElementById('auth-error');
-            el.textContent = msg;
-            el.classList.remove('hidden');
-        }
-
-        // --- API FUNCTIONS ---
-
-        // 1. LOGIN
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            try {
-                // Sending POST request to backend
-                const response = await fetch(`${API_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
                 const data = await response.json();
-
-                if (response.ok) {
-                    // Success: Save token & User info
-                    state.token = data.token;
-                    state.user = data.user;
-                    localStorage.setItem('verifeed_token', data.token);
-                    localStorage.setItem('verifeed_user', JSON.stringify(data.user));
-                    
-                    document.getElementById('user-display').textContent = data.user.username;
-                    
-                    // Redirect
-                    switchView('dashboard');
-                    loadPosts();
-                } else {
-                    showError(data.message || 'Login failed');
-                }
-            } catch (err) {
-                console.error(err);
-                showError('Server connection failed'); // Mock fallback for demo
-                
-                // --- DEMO MODE (Remove for production) ---
-                // If backend fails, we simulate a login for testing the UI
-                alert("Simulating login (Backend not found)");
-                localStorage.setItem('verifeed_token', 'demo-token');
-                state.token = 'demo-token';
-                switchView('dashboard');
-                loadPosts(); // Will load mock posts if fetch fails
+                errorMsg.textContent = data.detail || "Registration failed";
             }
+        } catch (err) {
+            errorMsg.textContent = "Server connection failed";
         }
+    }
 
-        // 2. REGISTER
-        async function handleRegister() {
-            const username = document.getElementById('reg-username').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
+    function logout() {
+        localStorage.removeItem('verifeed_token');
+        localStorage.removeItem('verifeed_user');
+        state.token = null;
+        state.user = null;
+        showAuth();
+    }
 
-            try {
-                const response = await fetch(`${API_URL}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password })
-                });
+    async function createPost() {
+        const title = document.getElementById('post-title').value;
+        const content = document.getElementById('post-content').value;
 
-                const data = await response.json();
+        if (!state.token) return logout();
 
-                if (response.ok) {
-                    alert('Account created! Please login.');
-                    slideAuth('login');
-                } else {
-                    showError(data.message || 'Registration failed');
-                }
-            } catch (err) {
-                console.error(err);
-                showError('Server connection failed');
+        try {
+            const response = await fetch(`${fastAPI}/posts`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}` 
+                },
+                body: JSON.stringify({ 
+                    title: title, 
+                    content: content,
+                    user: state.user.username
+                })
+            });
+
+            if (response.ok) {
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-content').value = '';
+                loadPosts(); 
+            } else {
+                alert("Failed to post");
             }
+        } catch (err) {
+            alert("Error posting content");
         }
+    }
 
-        // 3. LOGOUT
-        function handleLogout() {
-            localStorage.removeItem('verifeed_token');
-            localStorage.removeItem('verifeed_user');
-            state.token = null;
-            state.user = null;
-            switchView('auth');
-        }
+    async function loadPosts() {
+        const container = document.getElementById('posts-container');
+        
+        try {
+            const response = await fetch(`${fastAPI}/posts`);
+            const posts = await response.json();
 
-        // 4. FETCH POSTS (Protected Route)
-        async function loadPosts() {
-            const container = document.getElementById('posts-container');
-            
-            try {
-                // Ensure we have a token
-                if (!state.token) throw new Error("No token");
-
-                const response = await fetch(`${API_URL}/posts`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${state.token}`, // Sending Unique Session Token
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                // Handle Expired Session
-                if (response.status === 401 || response.status === 403) {
-                    alert("Session expired. Please login again.");
-                    handleLogout();
-                    return;
-                }
-
-                const posts = await response.json();
-                renderPosts(posts);
-
-            } catch (err) {
-                console.warn("Fetch failed, loading demo data...");
-                // Fallback demo data if backend isn't running
-                renderPosts([
-                    { id: 1, title: "Global Summit Reaches Agreement", content: "World leaders have agreed on a comprehensive plan...", user: "Admin", date: "2h ago" },
-                    { id: 2, title: "New AI Chip Revealed", content: "Tech giants unveil the fastest processor to date...", user: "TechReporter", date: "5h ago" }
-                ]);
-            }
-        }
-
-        // 5. RENDER POSTS
-        function renderPosts(posts) {
-            const container = document.getElementById('posts-container');
-            
             if (posts.length === 0) {
-                container.innerHTML = '<p class="text-center text-gray-500">No news available.</p>';
+                container.innerHTML = '<p class="text-center text-gray-500 italic">No news in the terminal.</p>';
                 return;
             }
 
             container.innerHTML = posts.map(post => `
-                <article class="bg-white border-2 border-[#1A1A1A] p-0 shadow-[8px_8px_0px_0px_#1A1A1A] hover:shadow-[12px_12px_0px_0px_#1D4ED8] transition-all duration-300 flex flex-col md:flex-row">
-                    <div class="w-full md:w-80 h-64 md:h-auto bg-gray-200 relative border-b-2 md:border-b-0 md:border-r-2 border-[#1A1A1A]">
-                        <img src="https://picsum.photos/600/400?random=${post.id}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500">
-                        <div class="absolute top-0 left-0 bg-[#1A1A1A] text-white text-[10px] font-black uppercase px-2 py-1">News</div>
-                    </div>
-                    <div class="p-8 flex-1 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-4">
-                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                                    By <span class="text-blue-700 underline">${post.user}</span>
-                                </span>
-                                <span class="text-[10px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded">Verified</span>
-                            </div>
-                            <h3 class="text-3xl font-black serif leading-none mb-4">${post.title}</h3>
-                            <p class="text-gray-600 font-serif leading-relaxed line-clamp-3">${post.content}</p>
-                        </div>
-                        <div class="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
-                            <button class="text-xs font-black uppercase tracking-wider hover:text-blue-700 flex items-center gap-2 group">
-                                Read Full Story 
-                                <span class="group-hover:translate-x-1 transition-transform">→</span>
-                            </button>
+                <article class="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_blue] transition-all">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                            By <span class="text-blue-700 underline">${post.user || post.username || 'Unknown'}</span>
+                        </span>
+                        <div class="flex text-yellow-500 text-xs">
+                            ${'★'.repeat(Math.round(post.average_rating || 5))}${'☆'.repeat(5 - Math.round(post.average_rating || 5))}
                         </div>
                     </div>
+                    <h3 class="text-2xl font-black serif mb-3 leading-none">${post.title}</h3>
+                    <p class="font-serif text-gray-700 leading-relaxed">${post.content}</p>
                 </article>
             `).join('');
+
+        } catch (err) {
+            container.innerHTML = '<p class="text-center text-red-500 font-bold">Failed to load feed.</p>';
         }
-
-        // 6. CREATE POST
-        async function createPost() {
-            const title = document.getElementById('post-title').value;
-            const content = document.getElementById('post-content').value;
-
-            try {
-                const response = await fetch(`${API_URL}/posts`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${state.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ title, content })
-                });
-
-                if (response.ok) {
-                    toggleModal('post');
-                    document.getElementById('post-title').value = '';
-                    document.getElementById('post-content').value = '';
-                    loadPosts(); // Refresh feed
-                    alert("Story submitted for verification.");
-                } else {
-                    alert("Failed to publish.");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("Error connecting to server.");
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
