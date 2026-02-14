@@ -17,6 +17,7 @@ async def getPosts():
     cursor = connection.cursor()
     cursor.execute("select * FROM content")
     posts = cursor.fetchall()
+    results = []
     for post in posts:
         results.append({
             "title": post[0],  
