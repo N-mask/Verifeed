@@ -18,8 +18,6 @@ async def login(mail:str,password:str):
     data = cursor.fetchone()
     connection.commit()
     if data:
-        usernameGlobal = data["username"]
-        print(usernameGlobal)
         return True
     else:
         return False
