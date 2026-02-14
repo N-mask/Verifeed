@@ -45,3 +45,12 @@ def run():
     user = input('Enter user: ')
     cont = input('Enter content: ')
     postNew(title,rating=rating,user=user,content=cont)
+    
+async def ratePost(user: str, post_title: str, score: int):
+    cursor = connection.cursor()
+    cursor.execute('INSERT OR REPLACE INTO votes (user, post_title, score) VALUES (?, ?, ?)', (user, post_title, score))
+    cursor.execute('SELECT AVG(score) FROM votes WHERE post_title=?', (post_title,))
+    new_avg = cursor.fetchone()[0]
+    cursor.execute('UPDATE content SET rating=? WHERE title=?', (new_avg, post_title))
+    connection.commit()
+    return new_avg

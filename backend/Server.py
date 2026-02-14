@@ -15,6 +15,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+class RateRequest(BaseModel):
+    user: str
+    title: str
+    score: int
+    
 class LoginRequest(BaseModel):
     email: str
     password: str
@@ -31,6 +37,11 @@ class PostRequest(BaseModel):
 @app.get('/')
 async def landing():
     return FileResponse('demo.html')
+
+@app.post('/rate')
+async def ratePostM(rate: RateRequest):
+    new_avg = await ratePost(rate.user, rate.title, rate.score)
+    return {"success": True, "new_average": new_avg}
 
 @app.post('/login')
 async def loginM(creds: LoginRequest):
