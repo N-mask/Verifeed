@@ -276,24 +276,6 @@
         }
     }
 
-    async function submitVote(postTitle, score) {
-        if(!state.user) return alert("Please login to vote");
-
-        const res = await fetch(`${API_URL}/rate`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                user: state.user.username,
-                title: postTitle,
-                score: score
-            })
-        });
-
-        if(res.ok) {
-            loadPosts(); // Refresh to show new average
-        }
-    }
-
     function toggleModal() {
         const modal = document.getElementById('post-modal');
         if (modal.classList.contains('hidden')) {
@@ -325,14 +307,9 @@
             });
 
             if (response.ok) {
-                // Clear inputs
                 document.getElementById('post-title').value = '';
                 document.getElementById('post-content').value = '';
-                
-                // Close modal
-                toggleModal(); 
-                
-                // Refresh feed
+                toggleModal();
                 loadPosts(); 
             } else {
                 alert("Failed to post");
@@ -358,7 +335,7 @@
         }
 
         try {
-            const response = await fetch(`${API_URL}/rate`, {
+            const response = await fetch(`${fastAPI}/rate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -369,17 +346,20 @@
             });
 
             if (response.ok) {
+                // Reload posts to see the updated rating
                 loadPosts(); 
             }
         } catch (err) {
             console.error("Voting failed", err);
         }
     }
+
+    // --- UPDATED: Load Posts with Clickable Stars ---
     async function loadPosts() {
         const container = document.getElementById('posts-container');
         
         try {
-            const response = await fetch(`${API_URL}/posts`);
+            const response = await fetch(`${fastAPI}/posts`);
             const posts = await response.json();
 
             if (posts.length === 0) {
@@ -388,10 +368,15 @@
             }
 
             container.innerHTML = posts.map(post => {
-                const rating = Math.round(post.average_rating || 0);
+                const rating = Math.round(post.rating || 0);
+                
+                // Generate 5 clickable stars
                 let starsHtml = '';
                 for (let i = 1; i <= 5; i++) {
+                    // If i is less than rating, make it yellow. Otherwise gray.
                     let colorClass = i <= rating ? 'text-yellow-500' : 'text-gray-300';
+                    
+                    // Create a button for each star
                     starsHtml += `
                         <button 
                             onclick="submitVote('${post.title}', ${i})" 
@@ -402,6 +387,7 @@
                         </button>
                     `;
                 }
+
                 return `
                 <article class="bg-white border-2 border-[#1A1A1A] p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_blue] transition-all">
                     <div class="flex justify-between items-start mb-2">
@@ -412,7 +398,7 @@
                         <div class="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full border border-gray-100">
                             ${starsHtml}
                             <span class="text-xs font-bold text-gray-400 ml-2">
-                                (${post.average_rating ? post.average_rating.toFixed(1) : '0.0'})
+                                (${post.rating ? post.rating.toFixed(1) : '0.0'})
                             </span>
                         </div>
                     </div>

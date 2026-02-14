@@ -72,6 +72,11 @@ async def getPostsM():
     posts = await getPosts()
     return posts
 
+@app.post('/rate')
+async def ratePostM(rate: RateRequest):
+    new_avg = await ratePost(rate.user, rate.title, rate.score)
+    return {"success": True, "new_average": new_avg}
+
 @app.post('/posts')
 async def createPostM(post: PostRequest):
     await postNew(post.title, 5.0, post.user, post.content)

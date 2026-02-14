@@ -3,6 +3,7 @@ from fastapi import FastAPI
 
 connection = sqlite3.Connection('lib.db',check_same_thread=False)
 connection.execute('CREATE TABLE IF NOT EXISTS content (title VARCHAR PRIMARY KEY,rating REAL,user VARCHAR,content VARCHAR)')
+connection.execute('CREATE TABLE IF NOT EXISTS votes (user VARCHAR, post_title VARCHAR, score INTEGER, PRIMARY KEY (user, post_title))')
 connection.commit()
 #Ensure that the user who has created the post can only del it
 
@@ -35,17 +36,7 @@ async def delAll(adminStaus:int):
         return f"Deleted data {x}"
     else:
         return "No admin privileges"
-async def delPost(title:str):
-    ...
-f = FastAPI()
-@f.get('/')
-def run():
-    title = input('Enter title: ')
-    rating = float(input('Enter demo rating: '))
-    user = input('Enter user: ')
-    cont = input('Enter content: ')
-    postNew(title,rating=rating,user=user,content=cont)
-    
+
 async def ratePost(user: str, post_title: str, score: int):
     cursor = connection.cursor()
     cursor.execute('INSERT OR REPLACE INTO votes (user, post_title, score) VALUES (?, ?, ?)', (user, post_title, score))
