@@ -29,7 +29,7 @@ async def loginM(email:str,password:str):
             "token":uid,
             "user":{
                 "email":email,
-                "username":usernameGlobal
+                "username":await getUserName(email)
             }
         }
     else:

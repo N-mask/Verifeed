@@ -13,6 +13,12 @@ async def register(username:str,password:str,mail:str,adminStatus:int):
     print(f'new user registered{mail} , {password}')
     return login(mail,password)
 
+async def getUserName(email:str):
+    cursor = connection.cursor()
+    cursor.execute('SELECT * FROM users  WHERE email=?',(email,))
+    connection.commit()
+    return cursor.fetchone()
+
 async def login(mail:str,password:str):
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM users WHERE email=? AND password=?',(mail,password))
