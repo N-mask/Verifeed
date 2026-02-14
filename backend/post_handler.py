@@ -25,7 +25,7 @@ async def getPosts():
             "user": post[2],   
             "content": post[3]
         })
-    return posts
+    return results
 
 async def delAll(adminStaus:int):
     if adminStaus == 1:

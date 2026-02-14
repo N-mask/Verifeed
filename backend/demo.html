@@ -29,7 +29,7 @@
         <div class="w-full max-w-md bg-white p-8 shadow-[10px_10px_0px_0px_#1A1A1A] border-2 border-[#1A1A1A] relative z-10">
             <div class="text-center mb-8">
                 <h1 class="text-5xl font-black italic tracking-tighter mb-2">Verifeed</h1>
-                <p class="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Verified • Secure • Trusted</p>
+                <p class="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Where truth is the only currency</p>
             </div>
 
             <div class="flex mb-6 bg-gray-100 p-1 border border-gray-200">
@@ -51,7 +51,7 @@
                                 <input type="password" id="login-password" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-blue-700 transition-colors font-bold" placeholder="••••••" required>
                             </div>
                             <button type="submit" class="w-full bg-[#1A1A1A] text-white py-3 px-6 font-black uppercase tracking-widest hover:bg-blue-700 transition-colors mt-2">
-                                Access Terminal
+                                Access News
                             </button>
                         </form>
                     </div>
@@ -71,7 +71,7 @@
                                 <input type="password" id="reg-password" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-blue-700 transition-colors" required>
                             </div>
                             <button type="submit" class="w-full bg-blue-700 text-white py-3 px-6 font-black uppercase tracking-widest hover:bg-[#1A1A1A] transition-colors mt-2">
-                                Create Identity
+                                Create Account
                             </button>
                         </form>
                     </div>
@@ -172,14 +172,12 @@
             showAuth();
         }
     });
-
     function showAuth() {
         document.getElementById('view-auth').classList.remove('hidden');
         document.getElementById('view-auth').classList.add('flex');
         document.getElementById('view-dashboard').classList.add('hidden');
         document.getElementById('view-dashboard').classList.remove('flex');
     }
-
     function showDashboard() {
         document.getElementById('view-auth').classList.add('hidden');
         document.getElementById('view-auth').classList.remove('flex');
@@ -191,29 +189,39 @@
         }
         loadPosts();
     }
+    function slideAuth(view) {
+    const slider = document.getElementById('auth-slider');
+    const tabLogin = document.getElementById('tab-login');
+    const tabReg = document.getElementById('tab-register');
+    const errorMsg = document.getElementById('auth-error');
+    if (errorMsg) {
+        errorMsg.classList.add('hidden');
+        errorMsg.textContent = '';
+    }
 
-    function toggleAuth(view) {
-        const loginForm = document.getElementById('form-login');
-        const regForm = document.getElementById('form-register');
-        const tabLogin = document.getElementById('tab-login');
-        const tabReg = document.getElementById('tab-register');
+    if (view === 'login') {
+        if (slider) slider.style.transform = "translateX(0%)";
+        if (tabLogin) {
+            tabLogin.classList.add('bg-white', 'shadow-sm', 'text-black'); 
+            tabLogin.classList.remove('text-gray-400');
+        }
+        if (tabReg) {
+            tabReg.classList.remove('bg-white', 'shadow-sm', 'text-black');
+            tabReg.classList.add('text-gray-400');
+        }
 
-        if (view === 'login') {
-            loginForm.classList.remove('hidden');
-            regForm.classList.add('hidden');
-            tabLogin.classList.add('bg-[#1A1A1A]', 'text-white');
-            tabLogin.classList.remove('bg-gray-50', 'text-gray-400');
-            tabReg.classList.remove('bg-[#1A1A1A]', 'text-white');
-            tabReg.classList.add('bg-gray-50', 'text-gray-400');
-        } else {
-            loginForm.classList.add('hidden');
-            regForm.classList.remove('hidden');
-            tabReg.classList.add('bg-[#1A1A1A]', 'text-white');
-            tabReg.classList.remove('bg-gray-50', 'text-gray-400');
-            tabLogin.classList.remove('bg-[#1A1A1A]', 'text-white');
-            tabLogin.classList.add('bg-gray-50', 'text-gray-400');
+    } else {
+        if (slider) slider.style.transform = "translateX(-50%)";
+        if (tabReg) {
+            tabReg.classList.add('bg-white', 'shadow-sm', 'text-black');
+            tabReg.classList.remove('text-gray-400');
+        }
+        if (tabLogin) {
+            tabLogin.classList.remove('bg-white', 'shadow-sm', 'text-black');
+            tabLogin.classList.add('text-gray-400');
         }
     }
+}
     async function handleLogin() {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
@@ -344,7 +352,7 @@
                             By <span class="text-blue-700 underline">${post.user || post.username || post.title}</span>
                         </span>
                         <div class="flex text-yellow-500 text-xs">
-                            ${'★'.repeat(Math.round(post.average_rating || 5))}${'☆'.repeat(5 - Math.round(post.average_rating || 5))}
+                            ${'★'.repeat(Math.round(post.rating || 5))}${'☆'.repeat(5 - Math.round(post.rating|| 5))}
                         </div>
                     </div>
                     <h3 class="text-2xl font-black serif mb-3 leading-none">${post.title}</h3>
