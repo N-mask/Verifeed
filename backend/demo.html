@@ -293,7 +293,7 @@
         if (!state.token) return logout();
 
         try {
-            const response = await fetch(`${API_URL}/posts`, {
+            const response = await fetch(`${fastAPI}/posts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
