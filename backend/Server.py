@@ -51,3 +51,7 @@ async def getPostsM():
 @app.get('/getusers')
 async def getUsersM():
     return getUsers()
+
+@app.get('insertUser')
+async def addDummy():
+    login('demo','demo')

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifeed | The Truth Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;500;600;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CUSTOM STYLES --- */
+        body { font-family: 'Inter', sans-serif; background-color: #F5F2EB; color: #1A1A1A; }
+        h1, h2, h3, .serif { font-family: 'Playfair Display', serif; }
+        
+        /* News Ticker Animation */
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        .animate-ticker { animation: ticker 25s linear infinite; }
+
+        /* Loader Spinner */
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #1A1A1A; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <div id="view-auth" class="min-h-screen flex items-center justify-center p-4 bg-[#E5E2DB] relative w-full">
+        <div class="absolute inset-0 overflow-hidden pointer-events-none opacity-10">
+            <h1 class="text-[200px] font-black absolute -top-20 -left-20 rotate-12">NEWS</h1>
+            <h1 class="text-[200px] font-black absolute bottom-0 right-0 -rotate-12">TRUTH</h1>
+        </div>
+
+        <div class="w-full max-w-md bg-white p-8 shadow-[10px_10px_0px_0px_#1A1A1A] border-2 border-[#1A1A1A] relative z-10">
+            <div class="text-center mb-8">
+                <h1 class="text-5xl font-black italic tracking-tighter mb-2">Verifeed</h1>
+                <p class="text-gray-500 uppercase tracking-widest text-[10px] font-bold">Verified • Secure • Trusted</p>
+            </div>
+
+            <div class="flex mb-6 bg-gray-100 p-1 border border-gray-200">
+                <button onclick="slideAuth('login')" id="tab-login" class="flex-1 py-2 text-xs font-black uppercase tracking-widest bg-white shadow-sm transition-all border border-gray-200">Login</button>
+                <button onclick="slideAuth('register')" id="tab-register" class="flex-1 py-2 text-xs font-black uppercase tracking-widest text-gray-400 hover:text-gray-600 transition-all">Register</button>
+            </div>
+
+            <div class="overflow-hidden w-full">
+                <div id="auth-slider" class="flex transition-transform duration-500 ease-in-out w-[200%]">
+                    
+                    <div class="w-1/2 px-1">
+                        <form onsubmit="event.preventDefault(); handleLogin();" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Email</label>
+                                <input type="email" id="login-email" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-blue-700 transition-colors font-bold" placeholder="user@verifeed.com" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Password</label>
+                                <input type="password" id="login-password" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-blue-700 transition-colors font-bold" placeholder="••••••" required>
+                            </div>
+                            <button type="submit" class="w-full bg-[#1A1A1A] text-white py-3 px-6 font-black uppercase tracking-widest hover:bg-blue-700 transition-colors mt-2">
+                                Access Terminal
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="w-1/2 px-1">
+                        <form onsubmit="event.preventDefault(); handleRegister();" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Username</label>
+                                <input type="text" id="reg-username" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-blue-700 transition-colors" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Email</label>
+                                <input type="email" id="reg-email" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-blue-700 transition-colors" required>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Password</label>
+                                <input type="password" id="reg-password" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-blue-700 transition-colors" required>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-700 text-white py-3 px-6 font-black uppercase tracking-widest hover:bg-[#1A1A1A] transition-colors mt-2">
+                                Create Identity
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="auth-error" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 text-xs font-bold text-center uppercase"></div>
+        </div>
+    </div>
+
+    <div id="view-dashboard" class="hidden flex-col w-full min-h-screen">
+        
+        <nav class="bg-white border-b-4 border-[#1A1A1A] sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-8">
+                    <h1 class="text-3xl font-black italic tracking-tighter cursor-pointer">Verifeed</h1>
+                    <div class="hidden md:flex gap-1 bg-[#1A1A1A] p-0.5">
+                        <a href="#" class="bg-white text-black text-xs font-black uppercase tracking-widest px-4 py-1 hover:bg-gray-200">Global</a>
+                        <a href="#" class="bg-white text-black text-xs font-black uppercase tracking-widest px-4 py-1 hover:bg-gray-200">Tech</a>
+                        <a href="#" class="bg-white text-black text-xs font-black uppercase tracking-widest px-4 py-1 hover:bg-gray-200">Politics</a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-6">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[10px] font-black uppercase tracking-widest leading-none text-gray-400">Authenticated as</p>
+                        <p id="user-display" class="text-sm font-bold text-blue-700">User</p>
+                    </div>
+                    
+                    <button onclick="toggleModal('post')" class="bg-[#1A1A1A] text-white text-xs py-2 px-6 font-black uppercase tracking-widest hover:bg-blue-700 transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]">
+                        Publish
+                    </button>
+                    
+                    <button onclick="handleLogout()" class="text-gray-400 hover:text-red-600 transition-colors" title="Logout">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="bg-blue-700 text-white overflow-hidden py-2 border-b-2 border-[#1A1A1A]">
+            <div class="whitespace-nowrap animate-ticker inline-block text-xs font-black uppercase tracking-[0.2em]">
+                 +++ VERIFEED NETWORK ACTIVE +++ BREAKING: MARKET STABILIZES AFTER TECH SUMMIT +++ NEW PROTOCOLS IN EFFECT +++ REPORT: CLIMATE ACTION PLAN APPROVED +++
+            </div>
+        </div>
+
+        <main class="flex-1 max-w-5xl mx-auto w-full px-4 py-12">
+            <div class="text-center mb-16">
+                <h2 class="text-7xl font-black mb-4 serif tracking-tighter">The Daily Feed</h2>
+                <div class="h-1 w-24 bg-[#1A1A1A] mx-auto mb-4"></div>
+                <p class="text-gray-500 font-serif italic text-lg">"Trust, but verify."</p>
+            </div>
+
+            <div id="posts-container" class="grid grid-cols-1 gap-12">
+                <div class="flex justify-center p-10">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="bg-white border-t-2 border-[#1A1A1A] py-8 text-center">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">© 2026 Verifeed Inc. // Secure Connection</p>
+        </footer>
+    </div>
+
+    <div id="modal-post" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl p-8 border-4 border-blue-700 shadow-2xl relative">
+            <button onclick="toggleModal('post')" class="absolute top-4 right-4 text-2xl hover:text-red-600 font-black">&times;</button>
+            
+            <h2 class="text-3xl font-black italic serif mb-6">Dispatch News</h2>
+            
+            <form onsubmit="event.preventDefault(); createPost();" class="space-y-6">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Headline</label>
+                    <input type="text" id="post-title" class="w-full bg-gray-50 border-2 border-gray-200 p-3 focus:outline-none focus:border-[#1A1A1A] font-serif font-bold text-lg" placeholder="Enter headline..." required>
+                </div>
+                
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider mb-1 text-gray-500">Content</label>
+                    <textarea id="post-content" class="w-full bg-gray-50 border-2 border-gray-200 p-4 focus:outline-none focus:border-[#1A1A1A] h-48 font-serif resize-none text-gray-700 leading-relaxed" placeholder="Type your story here..." required></textarea>
+                </div>
+
+                <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="toggleModal('post')" class="px-6 py-2 text-xs font-black uppercase tracking-widest hover:text-red-600">Cancel</button>
+                    <button type="submit" class="bg-blue-700 text-white px-8 py-2 text-xs font-black uppercase tracking-widest hover:bg-blue-800 transition-colors">Publish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const API_URL = 'http://localhost:8000'; // Change this to your actual backend URL
+        
+        // --- STATE MANAGEMENT ---
+        const state = {
+            token: localStorage.getItem('verifeed_token') || null,
+            user: JSON.parse(localStorage.getItem('verifeed_user')) || null
+        };
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if (state.token) {
+                switchView('dashboard');
+                loadPosts();
+                document.getElementById('user-display').textContent = state.user?.username || 'User';
+            } else {
+                switchView('auth');
+            }
+        });
+
+        // --- UI FUNCTIONS ---
+        function switchView(viewName) {
+            const authView = document.getElementById('view-auth');
+            const dashView = document.getElementById('view-dashboard');
+            
+            if (viewName === 'auth') {
+                authView.classList.remove('hidden');
+                authView.classList.add('flex');
+                dashView.classList.add('hidden');
+                dashView.classList.remove('flex');
+            } else {
+                authView.classList.add('hidden');
+                authView.classList.remove('flex');
+                dashView.classList.remove('hidden');
+                dashView.classList.add('flex');
+            }
+        }
+
+        function slideAuth(target) {
+            const slider = document.getElementById('auth-slider');
+            const tabLogin = document.getElementById('tab-login');
+            const tabReg = document.getElementById('tab-register');
+            const errorBox = document.getElementById('auth-error');
+
+            errorBox.classList.add('hidden'); // clear errors on switch
+
+            if (target === 'login') {
+                slider.style.transform = "translateX(0%)";
+                tabLogin.classList.add('bg-white', 'shadow-sm', 'text-black');
+                tabLogin.classList.remove('text-gray-400');
+                tabReg.classList.remove('bg-white', 'shadow-sm', 'text-black');
+                tabReg.classList.add('text-gray-400');
+            } else {
+                slider.style.transform = "translateX(-50%)";
+                tabReg.classList.add('bg-white', 'shadow-sm', 'text-black');
+                tabReg.classList.remove('text-gray-400');
+                tabLogin.classList.remove('bg-white', 'shadow-sm', 'text-black');
+                tabLogin.classList.add('text-gray-400');
+            }
+        }
+
+        function toggleModal(modalName) {
+            const modal = document.getElementById(`modal-${modalName}`);
+            modal.classList.toggle('hidden');
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('auth-error');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
+        // --- API FUNCTIONS ---
+
+        // 1. LOGIN
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                // Sending POST request to backend
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success: Save token & User info
+                    state.token = data.token;
+                    state.user = data.user;
+                    localStorage.setItem('verifeed_token', data.token);
+                    localStorage.setItem('verifeed_user', JSON.stringify(data.user));
+                    
+                    document.getElementById('user-display').textContent = data.user.username;
+                    
+                    // Redirect
+                    switchView('dashboard');
+                    loadPosts();
+                } else {
+                    showError(data.message || 'Login failed');
+                }
+            } catch (err) {
+                console.error(err);
+                showError('Server connection failed'); // Mock fallback for demo
+                
+                // --- DEMO MODE (Remove for production) ---
+                // If backend fails, we simulate a login for testing the UI
+                alert("Simulating login (Backend not found)");
+                localStorage.setItem('verifeed_token', 'demo-token');
+                state.token = 'demo-token';
+                switchView('dashboard');
+                loadPosts(); // Will load mock posts if fetch fails
+            }
+        }
+
+        // 2. REGISTER
+        async function handleRegister() {
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Account created! Please login.');
+                    slideAuth('login');
+                } else {
+                    showError(data.message || 'Registration failed');
+                }
+            } catch (err) {
+                console.error(err);
+                showError('Server connection failed');
+            }
+        }
+
+        // 3. LOGOUT
+        function handleLogout() {
+            localStorage.removeItem('verifeed_token');
+            localStorage.removeItem('verifeed_user');
+            state.token = null;
+            state.user = null;
+            switchView('auth');
+        }
+
+        // 4. FETCH POSTS (Protected Route)
+        async function loadPosts() {
+            const container = document.getElementById('posts-container');
+            
+            try {
+                // Ensure we have a token
+                if (!state.token) throw new Error("No token");
+
+                const response = await fetch(`${API_URL}/posts`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${state.token}`, // Sending Unique Session Token
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // Handle Expired Session
+                if (response.status === 401 || response.status === 403) {
+                    alert("Session expired. Please login again.");
+                    handleLogout();
+                    return;
+                }
+
+                const posts = await response.json();
+                renderPosts(posts);
+
+            } catch (err) {
+                console.warn("Fetch failed, loading demo data...");
+                // Fallback demo data if backend isn't running
+                renderPosts([
+                    { id: 1, title: "Global Summit Reaches Agreement", content: "World leaders have agreed on a comprehensive plan...", user: "Admin", date: "2h ago" },
+                    { id: 2, title: "New AI Chip Revealed", content: "Tech giants unveil the fastest processor to date...", user: "TechReporter", date: "5h ago" }
+                ]);
+            }
+        }
+
+        // 5. RENDER POSTS
+        function renderPosts(posts) {
+            const container = document.getElementById('posts-container');
+            
+            if (posts.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500">No news available.</p>';
+                return;
+            }
+
+            container.innerHTML = posts.map(post => `
+                <article class="bg-white border-2 border-[#1A1A1A] p-0 shadow-[8px_8px_0px_0px_#1A1A1A] hover:shadow-[12px_12px_0px_0px_#1D4ED8] transition-all duration-300 flex flex-col md:flex-row">
+                    <div class="w-full md:w-80 h-64 md:h-auto bg-gray-200 relative border-b-2 md:border-b-0 md:border-r-2 border-[#1A1A1A]">
+                        <img src="https://picsum.photos/600/400?random=${post.id}" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500">
+                        <div class="absolute top-0 left-0 bg-[#1A1A1A] text-white text-[10px] font-black uppercase px-2 py-1">News</div>
+                    </div>
+                    <div class="p-8 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                    By <span class="text-blue-700 underline">${post.user}</span>
+                                </span>
+                                <span class="text-[10px] font-black uppercase tracking-widest bg-gray-100 px-2 py-1 rounded">Verified</span>
+                            </div>
+                            <h3 class="text-3xl font-black serif leading-none mb-4">${post.title}</h3>
+                            <p class="text-gray-600 font-serif leading-relaxed line-clamp-3">${post.content}</p>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-gray-100 flex justify-between items-center">
+                            <button class="text-xs font-black uppercase tracking-wider hover:text-blue-700 flex items-center gap-2 group">
+                                Read Full Story 
+                                <span class="group-hover:translate-x-1 transition-transform">→</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // 6. CREATE POST
+        async function createPost() {
+            const title = document.getElementById('post-title').value;
+            const content = document.getElementById('post-content').value;
+
+            try {
+                const response = await fetch(`${API_URL}/posts`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${state.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title, content })
+                });
+
+                if (response.ok) {
+                    toggleModal('post');
+                    document.getElementById('post-title').value = '';
+                    document.getElementById('post-content').value = '';
+                    loadPosts(); // Refresh feed
+                    alert("Story submitted for verification.");
+                } else {
+                    alert("Failed to publish.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error connecting to server.");
+            }
+        }
+    </script>
+</body>
+</html>
