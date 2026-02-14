@@ -2,7 +2,7 @@ import sqlite3
 from fastapi import FastAPI
 
 connection = sqlite3.Connection('lib.db',check_same_thread=False)
-connection.execute('CREATE TABLE IF NOT EXISTS content (title VARCHAR,rating REAL,user VARCHAR,content VARCHAR)')
+connection.execute('CREATE TABLE IF NOT EXISTS content (title VARCHAR PRIMARY KEY,rating REAL,user VARCHAR,content VARCHAR)')
 connection.commit()
 #Ensure that the user who has created the post can only del it
 

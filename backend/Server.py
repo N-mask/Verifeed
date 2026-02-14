@@ -60,6 +60,7 @@ async def registerM(creds: RegisterRequest):
 async def getPostsM():
     posts = await getPosts()
     return posts
+
 @app.post('/posts')
 async def createPostM(post: PostRequest):
     await postNew(post.title, 5.0, post.user, post.content)
