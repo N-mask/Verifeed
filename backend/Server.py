@@ -25,10 +25,10 @@ async def loginM(email:str,password:str):
     print(logged)
     if logged:
         return {
-            "token":"demouid",
+            "token":str(uuid4()),
             "user":{
                 "email":email,
-                "username":getUserName(email)
+                "username": await getUserName(email)
             }
         }
     else:
@@ -46,6 +46,11 @@ async def registerM(username:str,email:str,password:str):
 async def getPostsM():
     posts = await getPosts()
     return posts
+
+@app.post('/posts')
+async def createPostM(title:str,user:str,content:str):
+    await postNew(title, 5.0, user, content)
+    return {"success": True}
 
 @app.get('/getusers')
 async def getUsersM():

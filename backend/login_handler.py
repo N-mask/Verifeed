@@ -14,13 +14,16 @@ async def register(username:str,password:str,mail:str,adminStatus:int):
     else:
         return False
     connection.commit()
-    return login(mail,password)
+    return await login(mail,password)
 
 async def getUserName(email:str):
     cursor = connection.cursor()
     cursor.execute('SELECT * FROM users  WHERE email=?',(email,))
-    connection.commit()
-    return str(cursor.fetchone())
+    data = cursor.fetchone()
+    if data:
+        return data['username']
+    else:
+        return "X"
 
 async def login(mail:str,password:str):
     cursor = connection.cursor()
