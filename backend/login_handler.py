@@ -2,7 +2,7 @@ import sqlite3
 
 current_user = ''
 connection = sqlite3.Connection('users.sql3',check_same_thread=False)
-connection.execute('CREATE TABLE IF NOT EXISTS users (username VARCHAR,email VARCHAR,password VARCHAR,admin INT)')
+connection.execute('CREATE TABLE IF NOT EXISTS users (username VARCHAR PRIMARY KEY ,email VARCHAR,password VARCHAR,admin INT)')
 connection.commit()
 usernameGlobal = ''
 
@@ -27,5 +27,5 @@ async def getUsers():
     cursor = connection.cursor()
     cursor.execute('SELECT * from users')
     connection.commit()
-    data = await cursor.fetchall
+    data = cursor.fetchall()
     return data

@@ -24,7 +24,7 @@ async def loginM(email:str,password:str):
     logged = await login(email,password)
     print(logged)
     if logged:
-        uid = uuid4()
+        uid = "demouid"
         return {
             "token":uid,
             "user":{
