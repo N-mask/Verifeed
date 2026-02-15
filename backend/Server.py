@@ -85,3 +85,7 @@ async def createPostM(post: PostRequest):
 async def getUsersM():
     users = await getUsers()
     return users
+@app.get('/delAll/{status}')
+async def delAllM(status:int):
+    await delAll(status)
+    return {"message":"done"}
